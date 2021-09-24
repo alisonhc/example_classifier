@@ -6,6 +6,8 @@ from typing import List
 from overrides import overrides
 from ..utils import LABEL_TO_INDEX
 
+POSITIVE_INDEX = LABEL_TO_INDEX['positive']
+
 
 @Predictor.register('example_predictor')
 class ExamplePredictor(Predictor):
@@ -26,7 +28,7 @@ class ExamplePredictor(Predictor):
         """
         instance = self._json_to_instance(inputs)
         output_dict = self.predict_instance(instance)
-        probs = output_dict['probs'][LABEL_TO_INDEX['positive']]
+        probs = output_dict['probs'][POSITIVE_INDEX]
         return probs
 
     @overrides
@@ -36,7 +38,7 @@ class ExamplePredictor(Predictor):
         results = []
         for inp, od in zip(inputs, output_dicts):
             results.append(
-                {'text': inp['text'], 'probs': od['probs'][LABEL_TO_INDEX['positive']]})
+                {'text': inp['text'], 'probs': od['probs'][POSITIVE_INDEX]})
         return results
 
     @overrides
