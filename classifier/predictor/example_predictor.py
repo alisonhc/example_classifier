@@ -4,7 +4,6 @@ from allennlp.common.util import JsonDict
 from allennlp.predictors import Predictor
 from typing import List
 from overrides import overrides
-import json
 from ..utils import LABEL_TO_INDEX
 
 
@@ -36,21 +35,11 @@ class ExamplePredictor(Predictor):
         output_dicts = self.predict_batch_instance(instances)
         results = []
         for inp, od in zip(inputs, output_dicts):
-            results.append({'text': inp['text'], 'probs': od['probs'][0]})
+            results.append(
+                {'text': inp['text'], 'probs': od['probs'][LABEL_TO_INDEX['positive']]})
         return results
-
-    @overrides
-    def _batch_json_to_instances(self, json_dicts: List[JsonDict]) -> List[Instance]:
-        instances = []
-        for json_dict in json_dicts:
-            instances.append(self._json_to_instance(json_dict))
-        return instances
 
     @overrides
     def _json_to_instance(self, json_dict: JsonDict) -> Instance:
         text = json_dict['text']
         return self._dataset_reader.example_to_instance(text=text, label=None)
-
-    @overrides
-    def dump_line(self, outputs: JsonDict) -> str:
-        return json.dumps(outputs) + '\n'
