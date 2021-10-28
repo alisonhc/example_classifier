@@ -28,7 +28,7 @@ def create_jsonl_evp_data(evp_path):
                 if check_if_usable_sentence(example):
                     data_list.append({"text": example, "label": label})
     print(len(data_list))
-    with jsonlines.open(os.path.join('data', 'evp_all.jsonl'), 'w') as writer:
+    with jsonlines.open(os.path.join('..', 'data', 'evp_all.jsonl'), 'w') as writer:
         for sample in data_list:
             writer.write(sample)
 
@@ -47,6 +47,6 @@ def create_train_test_dev_data(fpath, start='evp'):
     dev_samples = test_dev_samples[test_num:]
     for tup in [('train', train_samples), ('test', test_samples), ('dev', dev_samples)]:
         print(f"{tup[0]} samples: {len(tup[1])}")
-        with jsonlines.open(os.path.join('data', f'{start}_{tup[0]}.jsonl'), 'w') as writer:
+        with jsonlines.open(os.path.join('', 'data', f'{start}_{tup[0]}.jsonl'), 'w') as writer:
             for sample in tup[1]:
                 writer.write(sample)
