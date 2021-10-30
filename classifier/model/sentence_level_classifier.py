@@ -40,7 +40,7 @@ class SentenceLevelClassifier(Model):
         #reshaped = encoding.reshape(5,)
         #print(reshaped.shape)
         #print(self.classifier.cutpoints.shape)
-        logits = self.classifier(encoding)
+        #logits = self.classifier(encoding)
         logits = self.classifier.forward(encoding)
         probs = self.ordinal_logistic.forward(logits)
         #probs = F.softmax(logits, dim=1)
