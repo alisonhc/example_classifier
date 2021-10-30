@@ -1,4 +1,3 @@
-torch
 allennlp
 jsonlines
-overrides
+spacecutter
