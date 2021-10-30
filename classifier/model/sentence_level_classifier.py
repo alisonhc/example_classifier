@@ -6,7 +6,7 @@ from spacecutter.models import OrdinalLogisticModel, LogisticCumulativeLink
 from spacecutter.losses import CumulativeLinkLoss
 from allennlp.training.metrics import CategoricalAccuracy, MeanAbsoluteError, FBetaMeasure
 import torch
-#import torch.nn as nn
+import torch.nn as nn
 import torch.nn.functional as F
 from typing import Dict
 from ..utils import MULTI_LABEL_TO_INDEX
@@ -22,8 +22,9 @@ class SentenceLevelClassifier(Model):
         self.embedder = embedder
         self.encoder = encoder
         num_labels = len(MULTI_LABEL_TO_INDEX)
+        self.classifier = nn.Linear(encoder.get_output_dim(), num_labels)
         #self.classifier = nn.Linear(encoder.get_output_dim(), num_labels)
-        self.classifier = OrdinalLogisticModel(predictor=self.encoder, num_classes=num_labels)
+        self.ordinal_logistic = LogisticCumulativeLink(num_classes=num_labels)
         self.accuracy = CategoricalAccuracy()
         self.mar = MeanAbsoluteError()
         self.fbeta = FBetaMeasure(labels=MULTI_LABEL_TO_INDEX.values())
@@ -38,14 +39,16 @@ class SentenceLevelClassifier(Model):
         #print(encoding.shape)
         #reshaped = encoding.reshape(5,)
         #print(reshaped.shape)
-        print(self.classifier.cutpoints.shape)
+        #print(self.classifier.cutpoints.shape)
+        logits = self.classifier(encoding)
         logits = self.classifier.forward(encoding)
-        probs = F.softmax(logits, dim=1)
+        probs = self.ordinal_logistic.forward(logits)
+        #probs = F.softmax(logits, dim=1)
         output['probs'] = probs
         if label is not None:
             #loss = F.cross_entropy(logits, label)
             #loss = F.mse_loss(logits, label)
-            loss = CumulativeLinkLoss().forward(logits, label)
+            loss = CumulativeLinkLoss().forward(probs, label)
             output['loss'] = loss
             self.accuracy(logits, label)
             self.mar(logits, label, mask)
