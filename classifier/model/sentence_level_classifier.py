@@ -36,8 +36,10 @@ class SentenceLevelClassifier(Model):
         mask = util.get_text_field_mask(text)
         encoding = self.encoder(token_embeds, mask=mask)
         print(encoding.shape)
+        reshaped = encoding.reshape(5,)
+        print(reshaped.shape)
         print(self.classifier.cutpoints.shape)
-        logits = self.classifier.forward(encoding.reshape(5))
+        logits = self.classifier.forward(reshaped)
         probs = F.softmax(logits, dim=1)
         output['probs'] = probs
         if label is not None:
