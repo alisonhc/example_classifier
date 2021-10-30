@@ -35,7 +35,9 @@ class SentenceLevelClassifier(Model):
         token_embeds = self.embedder(text)
         mask = util.get_text_field_mask(text)
         encoding = self.encoder(token_embeds, mask=mask)
-        logits = self.classifier.forward(encoding)
+        print(encoding.shape)
+        print(self.classifier.cutpoints.shape)
+        logits = self.classifier.forward(encoding.reshape(5))
         probs = F.softmax(logits, dim=1)
         output['probs'] = probs
         if label is not None:
@@ -46,7 +48,20 @@ class SentenceLevelClassifier(Model):
             self.accuracy(logits, label)
             self.mar(logits, label, mask)
             self.fbeta(logits, label, mask=mask)
+            self.classifier.apply(self.ascension_callback())
         return output
+
+    def ascension_callback(margin=0.0, min_val=-1.0e6):
+
+        def _clip(module):
+            if isinstance(module, LogisticCumulativeLink):
+                cutpoints = module.cutpoints.data
+                for i in range(cutpoints.shape[0] - 1):
+                    cutpoints[i].clamp_(
+                        min_val, cutpoints[i + 1] - margin
+                    )
+
+        return _clip
 
     def get_metrics(self, reset: bool = False) -> Dict[str, float]:
         metrics = {"accuracy": self.accuracy.get_metric(
