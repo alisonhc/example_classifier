@@ -26,7 +26,7 @@ class SentenceLevelClassifier(Model):
         self.ordinal_logistic = LogisticCumulativeLink(num_classes=num_labels)
         self.accuracy = CategoricalAccuracy()
         self.mar = MeanAbsoluteError()
-        self.fbeta = FBetaMeasure(labels=MULTI_LABEL_TO_INDEX.values())
+        self.fbeta = FBetaMeasure(labels=list(MULTI_LABEL_TO_INDEX.values()))
 
     def forward(self,
                 text: TextFieldTensors,
@@ -44,10 +44,8 @@ class SentenceLevelClassifier(Model):
             output['loss'] = loss
             self.classifier.apply(self.ascension_callback())
             self.accuracy(logits, label)
-            self.fbeta(logits, label, mask=mask)
-            print('probs shape', probs.shape)
-            print(logits.shape, label.shape, mask.shape)
-            self.mar(logits, label, mask)
+            self.fbeta(logits, label)
+            self.mar(logits.argmax(dim=1), label)
         return output
 
     def ascension_callback(margin=0.0, min_val=-1.0e6):
