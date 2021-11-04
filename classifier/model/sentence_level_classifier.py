@@ -26,7 +26,7 @@ class SentenceLevelClassifier(Model):
         self.ordinal_logistic = LogisticCumulativeLink(num_classes=num_labels)
         self.accuracy = CategoricalAccuracy()
         self.mar = MeanAbsoluteError()
-        self.fbeta = FBetaMeasure(labels=list(MULTI_LABEL_TO_INDEX.values()))
+        self.fbeta = FBetaMeasure(labels=list(MULTI_LABEL_TO_INDEX.values()), average='micro')
 
     def forward(self,
                 text: TextFieldTensors,
@@ -62,5 +62,5 @@ class SentenceLevelClassifier(Model):
 
     def get_metrics(self, reset: bool = False) -> Dict[str, float]:
         metrics = {"accuracy": self.accuracy.get_metric(
-            reset), 'mar': self.mar.get_metric(reset), **self.fbeta.get_metric(reset)}
+            reset), **self.mar.get_metric(reset), **self.fbeta.get_metric(reset)}
         return metrics
