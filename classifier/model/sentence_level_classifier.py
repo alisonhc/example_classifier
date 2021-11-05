@@ -22,30 +22,30 @@ class SentenceLevelClassifier(Model):
         self.embedder = embedder
         self.encoder = encoder
         num_labels = len(MULTI_LABEL_TO_INDEX)
-        self.classifier = nn.Linear(encoder.get_output_dim(), num_labels)
+        self.classifier = nn.Linear(encoder.get_output_dim(), 1)
         self.ordinal_logistic = LogisticCumulativeLink(num_classes=num_labels)
         self.accuracy = CategoricalAccuracy()
         self.mar = MeanAbsoluteError()
-        self.fbeta = FBetaMeasure(labels=list(MULTI_LABEL_TO_INDEX.values()), average='micro')
+        self.fbeta = FBetaMeasure(labels=list(MULTI_LABEL_TO_INDEX.values()), average='weighted')
 
     def forward(self,
                 text: TextFieldTensors,
                 label: torch.Tensor = None) -> Dict[str, torch.Tensor]:
         output = {}
         token_embeds = self.embedder(text)
-        mask = util.get_text_field_mask(text)
-        encoding = self.encoder(token_embeds, mask=mask)
+        #mask = util.get_text_field_mask(text)
+        encoding = self.encoder(token_embeds)
         logits = self.classifier.forward(encoding)
-        reshaped = logits.reshape(-1, 1)
-        probs = self.ordinal_logistic.forward(reshaped)
+        probs = self.ordinal_logistic.forward(logits)
         output['probs'] = probs
         if label is not None:
-            loss = CumulativeLinkLoss().forward(logits, torch.unsqueeze(label, dim=-1))
+            label_unsqueeze = torch.unsqueeze(label, dim=-1)
+            loss = CumulativeLinkLoss().forward(probs, label_unsqueeze)
             output['loss'] = loss
             self.classifier.apply(self.ascension_callback())
-            self.accuracy(logits, label)
-            self.fbeta(logits, label)
-            self.mar(logits.argmax(dim=1), label)
+            self.fbeta(probs, label)
+            self.mar(probs.argmax(dim=1), label)
+            self.accuracy(probs, label)
         return output
 
     def ascension_callback(margin=0.0, min_val=-1.0e6):
