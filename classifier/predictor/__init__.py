@@ -1,1 +1,2 @@
 from .example_predictor import ExamplePredictor
+from .sentence_level_predictor import SentenceLevelPredictor
