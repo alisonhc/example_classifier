@@ -6,7 +6,7 @@ from allennlp.data.token_indexers import TokenIndexer, SingleIdTokenIndexer
 from typing import Iterable, Dict
 import jsonlines
 import sys
-from ..utils import LABEL_TO_INDEX, MULTI_LABEL_TO_INDEX
+from ..utils import LABEL_TO_INDEX, MULTI_LABEL_TO_INDEX, GENERAL_LABEL_TO_INDEX
 
 
 @DatasetReader.register('example_reader')
@@ -27,7 +27,7 @@ class ExampleReader(DatasetReader):
                     example['text'], example.get('label', None))
                 yield instance
 
-    def example_to_instance(self, text: str, label: str = None, to_index=MULTI_LABEL_TO_INDEX) -> Instance:
+    def example_to_instance(self, text: str, label: str = None, to_index=GENERAL_LABEL_TO_INDEX) -> Instance:
         tokens = self.tokenizer.tokenize(text)
         text_field = TextField(tokens, self.text_token_indexers)
         fields = {'text': text_field}

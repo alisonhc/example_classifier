@@ -9,7 +9,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Dict
-from ..utils import MULTI_LABEL_TO_INDEX
+#from ..utils import MULTI_LABEL_TO_INDEX
+from ..utils import GENERAL_LABEL_TO_INDEX
 
 
 @Model.register('sentence_level_classifier')
@@ -21,12 +22,12 @@ class SentenceLevelClassifier(Model):
         super().__init__(vocab)
         self.embedder = embedder
         self.encoder = encoder
-        num_labels = len(MULTI_LABEL_TO_INDEX)
+        num_labels = len(GENERAL_LABEL_TO_INDEX)
         self.classifier = nn.Linear(encoder.get_output_dim(), 1)
         self.ordinal_logistic = LogisticCumulativeLink(num_classes=num_labels)
         self.accuracy = CategoricalAccuracy()
         self.mar = MeanAbsoluteError()
-        self.fbeta = FBetaMeasure(labels=list(MULTI_LABEL_TO_INDEX.values()), average='weighted')
+        self.fbeta = FBetaMeasure(labels=list(GENERAL_LABEL_TO_INDEX.values()), average='weighted')
 
     def forward(self,
                 text: TextFieldTensors,
