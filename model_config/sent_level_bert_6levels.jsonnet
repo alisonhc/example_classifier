@@ -14,12 +14,13 @@ local bert_model = "bert-base-cased";
                 "model_name": bert_model
             },
         },
-        "to_index": 2,
+        "to_index": 6,
+
     },
-    "train_data_path": "data/v1/train.v1.jsonl",
-    "validation_data_path": "data/v1/dev.v1.jsonl",
+    "train_data_path": "data/evp_train.jsonl",
+    "validation_data_path": "data/evp_dev.jsonl",
     "model": {
-        "type": "example_classifier",
+        "type": "sentence_level_classifier",
         "embedder": {
             "token_embedders": {
                 "tokens": {

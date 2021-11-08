@@ -14,6 +14,8 @@ local bert_model = "bert-base-cased";
                 "model_name": bert_model
             },
         },
+        "to_index": 3,
+
     },
     "train_data_path": "data/evp_train.jsonl",
     "validation_data_path": "data/evp_dev.jsonl",
@@ -35,7 +37,7 @@ local bert_model = "bert-base-cased";
     },
     "data_loader": {
         "batch_size": 32,
-        "shuffle": true
+        "shuffle": true,
     },
     "trainer": {
         "optimizer": {
