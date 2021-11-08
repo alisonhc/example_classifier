@@ -37,8 +37,8 @@ class SentenceLevelClassifier(Model):
                 label: torch.Tensor = None) -> Dict[str, torch.Tensor]:
         output = {}
         token_embeds = self.embedder(text)
-        #mask = util.get_text_field_mask(text)
-        encoding = self.encoder(token_embeds)
+        mask = util.get_text_field_mask(text)
+        encoding = self.encoder(token_embeds, mask=mask)
         #logits = self.classifier.forward(encoding)
         logits = self.classifier(encoding)
         probs = F.softmax(logits, dim=1)
