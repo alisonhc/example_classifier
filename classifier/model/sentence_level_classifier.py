@@ -24,8 +24,9 @@ class SentenceLevelClassifier(Model):
         self.encoder = encoder
         num_labels = len(MULTI_LABEL_TO_INDEX)
         #num_labels = 3
-        self.classifier = nn.Linear(encoder.get_output_dim(), 1)
-        self.ordinal_logistic = LogisticCumulativeLink(num_classes=num_labels)
+        #self.classifier = nn.Linear(encoder.get_output_dim(), 1)
+        self.classifier = nn.Linear(encoder.get_output_dim(), num_labels)
+        #self.ordinal_logistic = LogisticCumulativeLink(num_classes=num_labels)
         self.accuracy = CategoricalAccuracy()
         self.mar = MeanAbsoluteError()
         self.fbeta = FBetaMeasure(labels=list(MULTI_LABEL_TO_INDEX.values()), average='weighted')
@@ -38,14 +39,17 @@ class SentenceLevelClassifier(Model):
         token_embeds = self.embedder(text)
         #mask = util.get_text_field_mask(text)
         encoding = self.encoder(token_embeds)
-        logits = self.classifier.forward(encoding)
-        probs = self.ordinal_logistic.forward(logits)
+        #logits = self.classifier.forward(encoding)
+        logits = self.classifier(encoding)
+        probs = F.softmax(logits, dim=1)
+        # probs = self.ordinal_logistic.forward(logits)
         output['probs'] = probs
         if label is not None:
-            label_unsqueeze = torch.unsqueeze(label, dim=-1)
-            loss = CumulativeLinkLoss().forward(probs, label_unsqueeze)
+            # label_unsqueeze = torch.unsqueeze(label, dim=-1)
+            # loss = CumulativeLinkLoss().forward(probs, label_unsqueeze)
+            loss = F.cross_entropy(logits, label)
             output['loss'] = loss
-            self.classifier.apply(self.ascension_callback())
+            #self.classifier.apply(self.ascension_callback())
             self.fbeta(probs, label)
             self.mar(probs.argmax(dim=1), label)
             self.accuracy(probs, label)
