@@ -3,7 +3,7 @@ import numpy as np
 from classifier.utils import MULTI_LABEL_TO_INDEX, GENERAL_LABEL_TO_INDEX
 
 general_level_mapping = {0: 0, 1: 0, 2: 1, 3: 1, 4: 2, 5: 2}
-
+#voa_mapping = {'A': 0, 'B': 1, 'C': 2}
 
 def get_eval_metrics(result_fpath, labels_fpath):
     """
@@ -42,8 +42,6 @@ def get_eval_metrics(result_fpath, labels_fpath):
         if pred_class == actual_class:
             num_acc += 1
             acc_distribution[actual_class]['acc'] += 1
-            # if actual_class == 4:
-            #     print(texts[i])
         else:
             acc_distribution[actual_class]['inacc'] += 1
         if abs(pred_class - actual_class) <= 1:
@@ -70,6 +68,6 @@ def get_eval_metrics(result_fpath, labels_fpath):
     print(f"Mean absolute error: {round(mean_absolute_error, 3)}")
 
 if __name__ == '__main__':
-    test_labels_path = ''
-    res_path = ''
+    test_labels_path = '/Users/achi/Projects/nlp_lab_research/example_classifier/data/evp_phrases_1.jsonl'
+    res_path = '/Users/achi/Projects/nlp_lab_research/example_classifier/data/sent_level_ce_6class_mask_evp_phrases_expanded_pred.jsonl'
     get_eval_metrics(result_fpath=res_path, labels_fpath=test_labels_path)
